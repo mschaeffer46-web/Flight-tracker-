@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UpgradeIQ — United 1K Upgrade Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="overlay" onclick="closeSavedPanel()"></div>
+
+  <!-- SAVED FLIGHTS SIDE PANEL -->
+  <aside class="saved-panel" id="saved-panel">
+    <div class="saved-panel__header">
+      <h2>Watched Flights</h2>
+      <button class="btn-icon" onclick="closeSavedPanel()" aria-label="Close panel">&#x2715;</button>
+    </div>
+    <div class="saved-panel__body" id="saved-panel-body">
+      <p class="empty-msg">No flights watched yet. Click "Watch Flight" on any result.</p>
+    </div>
+  </aside>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-logo">UpgradeIQ</span>
+        <span class="status-chip">United 1K</span>
+      </div>
+      <button class="btn-saved" id="saved-btn" onclick="openSavedPanel()">
+        <span class="heart-icon">&#9825;</span>
+        Saved (<span id="saved-count">0</span>)
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- HERO SEARCH -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title">Find Your Best Upgrade Window</h1>
+        <p class="hero-subtitle">Score every United flight for Polaris upgrade probability — before you burn your PlusPoints.</p>
+
+        <div class="search-card">
+          <div class="search-row">
+
+            <!-- ORIGIN -->
+            <div class="input-group autocomplete-wrap" id="origin-wrap">
+              <label for="origin-input">From</label>
+              <div class="input-inner">
+                <input
+                  type="text"
+                  id="origin-input"
+                  class="search-input"
+                  placeholder="City or airport code"
+                  autocomplete="off"
+                  oninput="handleAutocomplete('origin')"
+                  onblur="hideDropdown('origin', 150)"
+                  onfocus="handleAutocomplete('origin')"
+                />
+                <span class="airport-code-badge" id="origin-code"></span>
+              </div>
+              <div class="autocomplete-dropdown" id="origin-dropdown"></div>
+            </div>
+
+            <!-- SWAP -->
+            <button class="swap-btn" onclick="swapAirports()" title="Swap airports" aria-label="Swap origin and destination">
+              &#8646;
+            </button>
+
+            <!-- DESTINATION -->
+            <div class="input-group autocomplete-wrap" id="dest-wrap">
+              <label for="dest-input">To</label>
+              <div class="input-inner">
+                <input
+                  type="text"
+                  id="dest-input"
+                  class="search-input"
+                  placeholder="City or airport code"
+                  autocomplete="off"
+                  oninput="handleAutocomplete('dest')"
+                  onblur="hideDropdown('dest', 150)"
+                  onfocus="handleAutocomplete('dest')"
+                />
+                <span class="airport-code-badge" id="dest-code"></span>
+              </div>
+              <div class="autocomplete-dropdown" id="dest-dropdown"></div>
+            </div>
+
+            <!-- DATE -->
+            <div class="input-group">
+              <label for="travel-date">Date</label>
+              <input type="date" id="travel-date" class="search-input date-input" />
+            </div>
+
+            <!-- UPGRADE TYPE -->
+            <div class="input-group">
+              <label for="upgrade-type">Upgrade Type</label>
+              <select id="upgrade-type" class="search-input select-input">
+                <option value="pluspoints">PlusPoints</option>
+                <option value="gpu">GPU Certificate</option>
+                <option value="comp">Complimentary (1K)</option>
+              </select>
+            </div>
+
+            <!-- SEARCH BUTTON -->
+            <button class="btn-search" onclick="searchFlights()">
+              Search Flights
+            </button>
+
+          </div>
+          <div class="search-error" id="search-error"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS SECTION (hidden until search) -->
+    <section class="results-section" id="results-section" style="display:none;">
+      <div class="results-header">
+        <h2 class="results-title" id="results-title">Results</h2>
+        <div class="sort-controls">
+          <span class="sort-label">Sort by:</span>
+          <button class="sort-btn active" id="sort-score" onclick="sortResults('score')">Best Upgrade</button>
+          <button class="sort-btn" id="sort-time" onclick="sortResults('time')">Earliest</button>
+          <button class="sort-btn" id="sort-seats" onclick="sortResults('seats')">Most Seats</button>
+        </div>
+      </div>
+      <div class="flight-grid" id="flight-grid"></div>
+    </section>
+
+    <!-- TIPS SECTION -->
+    <section class="tips-section">
+      <div class="tips-inner">
+        <h2 class="tips-heading">1K Upgrade Strategy Guide</h2>
+        <p class="tips-subheading">Six tactics to tilt the odds in your favor</p>
+        <div class="tips-grid">
+
+          <div class="tip-card">
+            <div class="tip-icon">&#9200;</div>
+            <h3 class="tip-title">Request Immediately</h3>
+            <p class="tip-body">United 1K members clear upgrades at T-24 hours before departure. Submit your upgrade request as soon as you book — the earlier you are on the waitlist, the better your position. Don't wait until check-in.</p>
+          </div>
+
+          <div class="tip-card">
+            <div class="tip-icon">&#127777;</div>
+            <h3 class="tip-title">Book Higher Fare Class</h3>
+            <p class="tip-body">Fare class determines your waitlist priority. Y and B class tickets give you top-tier upgrade priority, well above discounted economy fares. That extra cost per ticket can mean the difference between Polaris and coach.</p>
+          </div>
+
+          <div class="tip-card">
+            <div class="tip-icon">&#128197;</div>
+            <h3 class="tip-title">Fly Midweek</h3>
+            <p class="tip-body">Tuesday, Wednesday, and Thursday flights consistently have lower premium cabin demand. Business travelers dominate Mondays and Fridays, filling upgrade lists fast. A midweek departure dramatically improves your odds.</p>
+          </div>
+
+          <div class="tip-card">
+            <div class="tip-icon">&#127809;</div>
+            <h3 class="tip-title">Pick Shoulder Season</h3>
+            <p class="tip-body">May and October–November are the sweet spots for international upgrades. Summer (June–August) and major holidays pack premium cabins with revenue passengers. Flying during shoulder season means fewer competitors on the upgrade list.</p>
+          </div>
+
+          <div class="tip-card">
+            <div class="tip-icon">&#9992;</div>
+            <h3 class="tip-title">Choose the Right Plane</h3>
+            <p class="tip-body">The 777-300ER has 60 Polaris seats — twice as many as some 767 variants. More Polaris seats means more upgrade inventory. When two flights serve the same route, always pick the widebody with the larger premium cabin.</p>
+          </div>
+
+          <div class="tip-card">
+            <div class="tip-icon">&#128269;</div>
+            <h3 class="tip-title">Check PZ Inventory First</h3>
+            <p class="tip-body">Before spending PlusPoints, look up PZ fare bucket availability on ExpertFlyer. PlusPoints upgrades require open PZ space. If PZ is closed days out, save your points for a better flight — they're too valuable to waste on a dead waitlist.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <p>UpgradeIQ &mdash; For United 1K members. Not affiliated with United Airlines. Scores are estimates based on historical patterns.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
